@@ -12,7 +12,7 @@ Created mainly for Postresql, it should work also with Sqlite, easy to customize
 from pydal import DAL
 from daldbi import DbInspector
 
-uri = 'pgsql://postgres@192.168.2.15/mydb'
+uri = 'pgsql://postgres@127.0.0.1/mydb'
 db = DAL(uri)
 
 dbi = DbInspector(db)
