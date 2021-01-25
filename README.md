@@ -1,6 +1,6 @@
 # Dal DbInspector
 
-Helper to create DAL table definitions from legacy databases.
+Helper to create [PyDAL](https://github.com/web2py/pydal) table definitions from legacy databases.
 
 Created mainly for Postresql, it should work also with Sqlite, easy to customize.
 
