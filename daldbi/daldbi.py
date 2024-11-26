@@ -120,8 +120,8 @@ class DbiPostgresql(DbiAdapter):
             ):
                 res += [(f['column_name'], 'id')]
             elif f['data_type'] == 'numeric':
-                _np = f.get('numeric_precision', 10)
-                _ns = f.get('numeric_scale', 2)
+                _np = f.get('numeric_precision', 10) or 10
+                _ns = f.get('numeric_scale', 2) or 2
                 res += [(f['column_name'], f'decimal({_np}, {_ns}')]
             elif f['data_type'] != 'USER-DEFINED':
                 res += [(f['column_name'], self.datatypes[f['data_type']])]
@@ -160,7 +160,7 @@ class DbInspector(object):
 
     def table_def(self, table, with_id=False):
 
-        tpl = """db.define_table('%(tablename)s',%(sep)s%(fields)s%(sep)s%(sep)srname='%(rname)s',migrate=migrate)"""
+        tpl = """db.define_table('%(tablename)s',%(sep)s%(fields)s%(sep)srname='%(rname)s',%(sep)smigrate=migrate)"""
 
         cond = lambda x: True if with_id else x != 'id'
         flt_flds = ((f, t) for f, t in self.adapter.get_fields(table) if cond(f))
