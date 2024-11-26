@@ -1,0 +1,30 @@
+# pyproject.toml
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "daldbi"
+version = "0.1.0"
+description = "DAL DbInspector"
+readme = "README.md"
+license = { file = "LICENSE.md" }
+authors = [
+    { name = "Massimiliano Belletti", email = "max@belletti.net" }
+]
+# URL del repository del progetto
+urls = { "Homepage" = "https://github.com/mbelletti/daldbinspector.git" }
+# Trova automaticamente i pacchetti
+dependencies = [
+    # Elenco delle dipendenze del pacchetto
+]
+
+[project.optional-dependencies]
+# Definisci gruppi di dipendenze opzionali, se necessario
+dev = [
+    # Dipendenze per lo sviluppo
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+

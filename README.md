@@ -35,6 +35,7 @@ print(dbi.table_def('table1', with_id=True))
 ```
 
 Output:
+
 ```
 db.define_table('table1',
 		Field('id', type='id'),
@@ -54,6 +55,7 @@ db.table1
 ```
 
 Output:
+
 ```
 <Table table1 (id, user, ip, access_date, memo)>
 ```
