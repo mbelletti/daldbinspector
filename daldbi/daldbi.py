@@ -30,16 +30,15 @@ class DbiSqlite(DbiAdapter):
         'INT': 'integer',
         'REAL': 'decimal(10,2)',
     }
-    
+
     def get_fields(self, table) -> list:
         sql = "PRAGMA table_info('%s')" % table
         fields = self.db.executesql(sql, as_dict=True)
-        print(fields)
-        return [(f['name'], 'id' if f['pk'] == 1 else self.datatypes[f['type'].upper()]) for f in fields]     
+        return [(f['name'], 'id' if f['pk'] == 1 else self.datatypes[f['type'].upper()]) for f in fields]
 
     def get_tables(self) -> list:
-        sql = """SELECT name as table_name FROM sqlite_master 
-            WHERE type in ('table', 'view') AND 
+        sql = """SELECT name as table_name FROM sqlite_master
+            WHERE type in ('table', 'view') AND
             NOT name LIKE('sqlite_%');"""
 
         rows = self.db.executesql(sql, as_dict=True)
@@ -90,7 +89,7 @@ class DbiPostgresql(DbiAdapter):
 
     def get_fields(self, table) -> list:
         if table.find('.') > -1:
-            self.schema, table = table.split('.')      
+            self.schema, table = table.split('.')
 
         sql = """SELECT column_name, data_type,
             is_nullable,
@@ -98,24 +97,24 @@ class DbiPostgresql(DbiAdapter):
             numeric_precision, numeric_precision_radix, numeric_scale,
             column_default
             FROM information_schema.columns
-            WHERE table_schema = '%s' AND table_name='%s' 
+            WHERE table_schema = '%s' AND table_name='%s'
             ORDER BY ordinal_position""" % (self.schema, table)
 
         fields = self.db.executesql(sql, as_dict=True)
         res = []
         for f in fields:
-            if (('column_default' in f) and 
-                f['column_default'] and 
+            if (('column_default' in f) and
+                f['column_default'] and
                 f['column_default'].startswith('nextval')):
                 res += [(f['column_name'], 'id')]
             elif f['data_type'] == 'numeric':
                 res += [(f['column_name'], 'decimal(%(numeric_precision)d, %(numeric_scale)d)' % f)]
             elif f['data_type'] != 'USER-DEFINED':
                 res += [(f['column_name'], self.datatypes[f['data_type']])]
-        return res 
+        return res
 
     def get_tables(self) -> list:
-        sql = """SELECT table_name FROM information_schema.tables 
+        sql = """SELECT table_name FROM information_schema.tables
             WHERE table_schema = '%s' AND table_name LIKE '%%'AND
             NOT table_name LIKE('pg_%%');"""
         rows = self.db.executesql(sql % self.schema, as_dict=True)
@@ -127,7 +126,6 @@ class DbiAdapters:
     def get_adapter(cls, db, schema):
         for adpt in cls.dbi_adapters:
             if isinstance(db._adapter, adpt.adapter):
-                print(adpt)
                 return adpt(db, schema=schema)
         raise Exception('Adapter %s not found'.format(db._adapter.__class__))
 
@@ -146,7 +144,7 @@ class DbInspector(object):
     def table_def(self, table, with_id=False):
 
         tpl = """db.define_table('%(tablename)s',%(sep)s%(fields)s%(sep)s%(sep)srname='%(rname)s',migrate=migrate)"""
-        
+
         cond = lambda x: True if with_id else x != 'id'
         flt_flds = ((f, t) for f, t in self.adapter.get_fields(table) if cond(f) )
 
@@ -154,7 +152,7 @@ class DbInspector(object):
         params['sep'] = '\n\t\t'
 
         fields = params['sep'].join(["Field('%s', type='%s')," %(f, t) for f, t in flt_flds ])
-        if self.schema and self.schema != 'public': 
+        if self.schema and self.schema != 'public':
             params.update({'tablename': "%s_%s" % (self.schema, table), 'fields': fields})
         else:
             params.update({'tablename': table, 'fields': fields})
@@ -164,11 +162,11 @@ class DbInspector(object):
         else:
             params['rname'] = table
         return tpl % params
-    
+
     def _define_table(self, table):
         db = self.db
         #if table.find('.') > -1:
-        #    self.schema, table = table.split('.')        
+        #    self.schema, table = table.split('.')
         code = self.table_def(table)
         exec(code)
         self.tables.append(table)
